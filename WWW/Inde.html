@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professor Profile - Feedback System</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'display': ['Playfair Display', 'serif'],
+                        'body': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'navy': '#1e3a8a',
+                        'gold': '#d97706',
+                        'success': '#059669',
+                        'soft-gray': '#f8fafc',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .professor-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
+        
+        .review-card {
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .review-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .rating-stars {
+            color: #d97706;
+        }
+        
+        .nav-link {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-link:hover {
+            color: #d97706;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #d97706;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.6s ease;
+        }
+        
+        .helpful-btn:hover {
+            background-color: #059669;
+            color: white;
+        }
+        
+        .helpful-btn.voted {
+            background-color: #059669;
+            color: white;
+        }
+    </style>
+<base target="_blank">
+</head>
+<body class="font-body bg-soft-gray">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-display font-bold text-navy">Feedback System</a>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="nav-link text-gray-700 hover:text-gold font-medium">Home</a>
+                    <a href="#" class="nav-link text-gray-700 hover:text-gold font-medium">Browse</a>
+                    <a href="#" class="nav-link text-gray-700 hover:text-gold font-medium">About</a>
+                    <button onclick="showAddReview()" class="bg-gold text-white px-6 py-2 rounded-full hover:bg-yellow-600 transition-colors font-medium">Add Review</button>
+                </div>
+                <div class="md:hidden">
+                    <button class="text-gray-700 hover:text-gold">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Professor Header -->
+    <section class="professor-header pt-16 pb-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
+                <div class="flex-shrink-0">
+                    <img id="professorImage" src="" alt="" class="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-white shadow-2xl">
+                </div>
+                <div class="text-center md:text-left text-white flex-1">
+                    <h1 id="professorName" class="text-4xl md:text-5xl font-display font-bold mb-2"></h1>
+                    <p id="professorSubject" class="text-xl md:text-2xl text-blue-100 mb-2"></p>
+                    <p id="professorUniversity" class="text-lg text-blue-200 mb-6"></p>
+                    <div class="flex flex-col md:flex-row items-center gap-6">
+                        <div class="flex items-center">
+                            <div id="professorRating" class="rating-stars text-3xl mr-3"></div>
+                            <div>
+                                <div class="text-2xl font-bold" id="ratingValue"></div>
+                                <div class="text-blue-200 text-sm" id="reviewCount"></div>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <button onclick="showAddReview()" class="bg-gold text-white px-6 py-3 rounded-lg hover:bg-yellow-600 transition-colors font-semibold">
+                                Add Review
+                            </button>
+                            <button onclick="shareProfessor()" class="bg-white/20 text-white px-6 py-3 rounded-lg hover:bg-white/30 transition-colors font-semibold backdrop-blur-sm">
+                                Share
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Professor Details -->
+    <section class="py-12 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Bio and Specialties -->
+                <div class="lg:col-span-2">
+                    <div class="bg-soft-gray rounded-2xl p-8 mb-8">
+                        <h2 class="text-2xl font-display font-bold text-gray-900 mb-4">About</h2>
+                        <p id="professorBio" class="text-gray-700 leading-relaxed mb-6"></p>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-3">Specialties</h3>
+                            <div id="professorSpecialties" class="flex flex-wrap gap-2">
+                                <!-- Specialties will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Rating Distribution Chart -->
+                    <div class="bg-white rounded-2xl p-8 shadow-lg">
+                        <h2 class="text-2xl font-display font-bold text-gray-900 mb-6">Rating Distribution</h2>
+                        <div id="ratingChart" style="height: 300px;"></div>
+                    </div>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-2xl p-8 shadow-lg sticky top-24">
+                        <h2 class="text-xl font-display font-bold text-gray-900 mb-6">Statistics</h2>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Overall Rating</span>
+                                <span id="overallRating" class="font-semibold text-gray-900"></span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Total Reviews</span>
+                                <span id="totalReviews" class="font-semibold text-gray-900"></span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Would Take Again</span>
+                                <span class="font-semibold text-success">92%</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Difficulty</span>
+                                <span class="font-semibold text-gray-900">3.2/5</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Related Professors</h3>
+                            <div id="relatedProfessors" class="space-y-3">
+                                <!-- Related professors will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section class="py-16 bg-soft-gray">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h2 class="text-3xl font-display font-bold text-gray-900 mb-2">Student Reviews</h2>
+                    <p class="text-gray-600">What students are saying about this professor</p>
+                </div>
+                <div class="flex items-center gap-4 mt-4 md:mt-0">
+                    <select id="sortReviews" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="highest">Highest Rating</option>
+                        <option value="lowest">Lowest Rating</option>
+                        <option value="helpful">Most Helpful</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Reviews Container -->
+            <div id="reviewsContainer" class="space-y-6">
+                <!-- Reviews will be populated by JavaScript -->
+            </div>
+            
+            <!-- Load More Reviews -->
+            <div class="text-center mt-12">
+                <button id="loadMoreReviews" class="bg-navy text-white px-8 py-3 rounded-lg hover:bg-blue-800 transition-colors font-semibold">
+                    Load More Reviews
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Add Review Modal -->
+    <div id="addReviewModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-display font-bold text-gray-900">Add a Review</h3>
+                    <button onclick="closeAddReview()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <form id="reviewForm" onsubmit="submitReview(event)">
+                    <div class="mb-6">
+                        <div class="bg-soft-gray p-4 rounded-lg mb-4">
+                            <div class="flex items-center">
+                                <img id="modalProfessorImage" src="" alt="" class="w-12 h-12 rounded-full object-cover mr-3">
+                                <div>
+                                    <div id="modalProfessorName" class="font-semibold text-gray-900"></div>
+                                    <div id="modalProfessorSubject" class="text-sm text-gray-600"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Your Rating</label>
+                        <div class="flex items-center gap-2">
+                            <div class="rating-input flex gap-1" data-rating="0">
+                                <span class="star cursor-pointer text-3xl text-gray-300 hover:text-gold" data-rating="1">★</span>
+                                <span class="star cursor-pointer text-3xl text-gray-300 hover:text-gold" data-rating="2">★</span>
+                                <span class="star cursor-pointer text-3xl text-gray-300 hover:text-gold" data-rating="3">★</span>
+                                <span class="star cursor-pointer text-3xl text-gray-300 hover:text-gold" data-rating="4">★</span>
+                                <span class="star cursor-pointer text-3xl text-gray-300 hover:text-gold" data-rating="5">★</span>
+                            </div>
+                            <span id="ratingText" class="text-gray-600 ml-2">Click to rate</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Course</label>
+                            <input type="text" id="courseName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold" placeholder="e.g., CS101" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Semester</label>
+                            <select id="semester" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold" required>
+                                <option value="">Select semester</option>
+                                <option value="Fall 2024">Fall 2024</option>
+                                <option value="Spring 2024">Spring 2024</option>
+                                <option value="Fall 2023">Fall 2023</option>
+                                <option value="Spring 2023">Spring 2023</option>
+                                <option value="Fall 2022">Fall 2022</option>
+                                <option value="Spring 2022">Spring 2022</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Your Review</label>
+                        <textarea id="reviewText" rows="6" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold" placeholder="Share your experience with this professor... What did you like? What could be improved?" required></textarea>
+                        <div class="text-sm text-gray-500 mt-1">
+                            <span id="charCount">0</span>/1000 characters
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="anonymous" class="rounded border-gray-300 text-gold focus:ring-gold">
+                            <span class="ml-2 text-sm text-gray-700">Post anonymously (your name will not be shown)</span>
+                        </label>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <button type="submit" class="flex-1 bg-gold text-white py-3 rounded-lg hover:bg-yellow-600 transition-colors font-semibold">
+                            Submit Review
+                        </button>
+                        <button type="button" onclick="closeAddReview()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-navy text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="text-2xl font-display font-bold mb-4">Feedback System</div>
+                <p class="text-blue-200 mb-6">Empowering students to make informed educational choices</p>
+                <div class="text-sm text-blue-300">
+                    © 2024 Feedback System. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Professor page specific JavaScript
+        let currentProfessor = null;
+        let currentRating = 0;
+        let allReviews = [];
+        let displayedReviews = [];
+        let reviewsPerPage = 5;
+
+        // Initialize professor page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeProfessorPage();
+        });
+
+        function initializeProfessorPage() {
+            // Get professor ID from localStorage
+            const professorId = localStorage.getItem('selectedProfessorId');
+            if (!professorId) {
+                // Redirect to home if no professor ID
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Load professor data (in a real app, this would be an API call)
+            loadProfessorData(parseInt(professorId));
+            
+            // Initialize review form
+            initializeReviewForm();
+            
+            // Initialize sort functionality
+            document.getElementById('sortReviews').addEventListener('change', handleSortReviews);
+            
+            // Initialize load more button
+            document.getElementById('loadMoreReviews').addEventListener('click', loadMoreReviews);
+        }
+
+        function loadProfessorData(professorId) {
+            // Mock data - in a real app, this would come from an API
+            const professorsData = [
+                {
+                    id: 1,
+                    name: "Dr. Sarah Johnson",
+                    subject: "Computer Science",
+                    university: "Stanford University",
+                    image: "resources/professor-1.jpg",
+                    rating: 4.9,
+                    reviewCount: 127,
+                    specialties: ["Artificial Intelligence", "Machine Learning", "Data Science"],
+                    bio: "Dr. Sarah Johnson is a leading researcher in artificial intelligence with over 15 years of teaching experience. She holds a PhD in Computer Science from MIT and has published numerous papers in top-tier conferences. Her passion for making complex AI concepts accessible to students has earned her consistently high ratings. She believes in hands-on learning and often incorporates real-world projects into her curriculum.",
+                    reviews: [
+                        {
+                            id: 1,
+                            author: "Alex Thompson",
+                            avatar: "resources/student-avatars/avatar-1.jpg",
+                            rating: 5,
+                            date: "2024-01-15",
+                            course: "CS101",
+                            semester: "Fall 2023",
+                            text: "Dr. Johnson is absolutely amazing! She has this incredible ability to break down complex AI concepts into digestible pieces. Her lectures are engaging, and she always provides real-world examples that make the material click. The projects were challenging but rewarding, and her feedback was always constructive and helpful. I would definitely take another class with her!",
+                            helpful: 23,
+                            anonymous: false
+                        },
+                        {
+                            id: 2,
+                            author: "Maria Garcia",
+                            avatar: "resources/student-avatars/avatar-2.jpg",
+                            rating: 5,
+                            date: "2024-01-10",
+                            course: "CS201",
+                            semester: "Fall 2023",
+                            text: "One of the best professors I've had at Stanford. Dr. Johnson's enthusiasm for AI is infectious, and she creates such a positive learning environment. She's always available during office hours and genuinely cares about student success. The coursework is rigorous but fair, and you learn so much practical knowledge.",
+                            helpful: 18,
+                            anonymous: false
+                        },
+                        {
+                            id: 3,
+                            author: "David Kim",
+                            avatar: "resources/student-avatars/avatar-3.jpg",
+                            rating: 4,
+                            date: "2024-01-08",
+                            course: "CS301",
+                            semester: "Spring 2023",
+                            text: "Great professor with deep knowledge of the subject. The only reason I'm giving 4 stars instead of 5 is that the pacing can be quite fast, especially towards the end of the semester. However, if you stay on top of the material and attend office hours, you'll learn a tremendous amount. Her research insights are particularly valuable.",
+                            helpful: 12,
+                            anonymous: false
+                        },
+                        {
+                            id: 4,
+                            author: "Student123",
+                            avatar: "resources/student-avatars/avatar-4.jpg",
+                            rating: 5,
+                            date: "2023-12-20",
+                            course: "CS101",
+                            semester: "Fall 2023",
+                            text: "I was initially intimidated by AI, but Dr. Johnson made it so accessible. Her teaching style is perfect for beginners while still being challenging enough for advanced students. The guest speakers she brought in from industry were fantastic additions to the curriculum.",
+                            helpful: 8,
+                            anonymous: true
+                        },
+                        {
+                            id: 5,
+                            author: "Sarah M",
+                            avatar: "resources/student-avatars/avatar-5.jpg",
+                            rating: 5,
+                            date: "2023-12-15",
+                            course: "CS201",
+                            semester: "Fall 2023",
+                            text: "Absolutely phenomenal professor! Dr. Johnson goes above and beyond for her students. She remembers everyone's name, provides detailed feedback on assignments, and creates such an inclusive classroom environment. Her expertise in machine learning is evident in every lecture.",
+                            helpful: 15,
+                            anonymous: false
+                        }
+                    ]
+                }
+                // Add more professor data as needed
+            ];
+
+            currentProfessor = professorsData.find(p => p.id === professorId);
+            
+            if (!currentProfessor) {
+                // If professor not found, redirect to home
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Populate professor information
+            populateProfessorInfo();
+            
+            // Initialize reviews
+            allReviews = [...currentProfessor.reviews];
+            displayedReviews = [];
+            
+            // Display initial reviews
+            displayReviews();
+            
+            // Initialize rating chart
+            initializeRatingChart();
+            
+            // Load related professors
+            loadRelatedProfessors();
+        }
+
+        function populateProfessorInfo() {
+            document.getElementById('professorImage').src = currentProfessor.image;
+            document.getElementById('professorImage').alt = currentProfessor.name;
+            document.getElementById('professorName').textContent = currentProfessor.name;
+            document.getElementById('professorSubject').textContent = currentProfessor.subject;
+            document.getElementById('professorUniversity').textContent = currentProfessor.university;
+            document.getElementById('professorBio').textContent = currentProfessor.bio;
+            
+            // Rating
+            const ratingElement = document.getElementById('professorRating');
+            ratingElement.innerHTML = generateStars(currentProfessor.rating);
+            document.getElementById('ratingValue').textContent = currentProfessor.rating;
+            document.getElementById('reviewCount').textContent = `${currentProfessor.reviewCount} reviews`;
+            
+            // Statistics
+            document.getElementById('overallRating').textContent = currentProfessor.rating;
+            document.getElementById('totalReviews').textContent = currentProfessor.reviewCount;
+            
+            // Specialties
+            const specialtiesContainer = document.getElementById('professorSpecialties');
+            specialtiesContainer.innerHTML = currentProfessor.specialties.map(spec => 
+                `<span class="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">${spec}</span>`
+            ).join('');
+            
+            // Modal information
+            document.getElementById('modalProfessorImage').src = currentProfessor.image;
+            document.getElementById('modalProfessorName').textContent = currentProfessor.name;
+            document.getElementById('modalProfessorSubject').textContent = currentProfessor.subject;
+        }
+
+        function generateStars(rating) {
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+            
+            let stars = '';
+            
+            for (let i = 0; i < fullStars; i++) {
+                stars += '<span class="text-gold">★</span>';
+            }
+            
+            if (hasHalfStar) {
+                stars += '<span class="text-gold">☆</span>';
+            }
+            
+            for (let i = 0; i < emptyStars; i++) {
+                stars += '<span class="text-gray-300">★</span>';
+            }
+            
+            return stars;
+        }
+
+        function displayReviews(startIndex = 0) {
+            const container = document.getElementById('reviewsContainer');
+            const reviewsToShow = allReviews.slice(startIndex, startIndex + reviewsPerPage);
+            
+            if (startIndex === 0) {
+                container.innerHTML = '';
+                displayedReviews = [];
+            }
+            
+            displayedReviews.push(...reviewsToShow);
+            
+            reviewsToShow.forEach(review => {
+                const reviewElement = createReviewElement(review);
+                container.appendChild(reviewElement);
+            });
+            
+            // Show/hide load more button
+            const loadMoreBtn = document.getElementById('loadMoreReviews');
+            if (displayedReviews.length >= allReviews.length) {
+                loadMoreBtn.style.display = 'none';
+            } else {
+                loadMoreBtn.style.display = 'block';
+            }
+        }
+
+        function createReviewElement(review) {
+            const div = document.createElement('div');
+            div.className = 'review-card bg-white rounded-2xl p-6 shadow-lg fade-in';
+            
+            div.innerHTML = `
+                <div class="flex items-start gap-4">
+                    <img src="${review.avatar}" alt="${review.author}" class="w-12 h-12 rounded-full object-cover flex-shrink-0">
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <div>
+                                <h3 class="font-semibold text-gray-900">${review.anonymous ? 'Anonymous' : review.author}</h3>
+                                <div class="flex items-center gap-2 text-sm text-gray-600">
+                                    <span>${review.course}</span>
+                                    <span>•</span>
+                                    <span>${review.semester}</span>
+                                    <span>•</span>
+                                    <span>${formatDate(review.date)}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="rating-stars text-lg mr-2">
+                                    ${generateStars(review.rating)}
+                                </div>
+                                <span class="text-gray-700 font-semibold">${review.rating}</span>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">${review.text}</p>
+                        <div class="flex items-center gap-4">
+                            <button onclick="markHelpful(${review.id})" class="helpful-btn flex items-center gap-2 px-3 py-1 rounded-full text-sm border border-gray-300 hover:border-success transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21H9.737a2 2 0 01-1.789-1.106l-3.5-7A2 2 0 016.236 10H11V5a2 2 0 114 0v5z"></path>
+                                </svg>
+                                Helpful (${review.helpful})
+                            </button>
+                            <button onclick="reportReview(${review.id})" class="text-gray-500 hover:text-red-500 text-sm transition-colors">
+                                Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            return div;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        function handleSortReviews() {
+            const sortBy = document.getElementById('sortReviews').value;
+            
+            switch (sortBy) {
+                case 'newest':
+                    allReviews.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    break;
+                case 'oldest':
+                    allReviews.sort((a, b) => new Date(a.date) - new Date(b.date));
+                    break;
+                case 'highest':
+                    allReviews.sort((a, b) => b.rating - a.rating);
+                    break;
+                case 'lowest':
+                    allReviews.sort((a, b) => a.rating - b.rating);
+                    break;
+                case 'helpful':
+                    allReviews.sort((a, b) => b.helpful - a.helpful);
+                    break;
+            }
+            
+            displayReviews();
+        }
+
+        function loadMoreReviews() {
+            displayReviews(displayedReviews.length);
+        }
+
+        function initializeRatingChart() {
+            const chart = echarts.init(document.getElementById('ratingChart'));
+            
+            // Calculate rating distribution
+            const ratingCounts = [0, 0, 0, 0, 0];
+            allReviews.forEach(review => {
+                ratingCounts[review.rating - 1]++;
+            });
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars'],
+                    axisLabel: {
+                        color: '#6B7280'
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLabel: {
+                        color: '#6B7280'
+                    }
+                },
+                series: [{
+                    name: 'Number of Reviews',
+                    type: 'bar',
+                    data: ratingCounts,
+                    itemStyle: {
+                        color: '#d97706'
+                    },
+                    barWidth: '60%'
+                }]
+            };
+            
+            chart.setOption(option);
+            
+            // Make chart responsive
+            window.addEventListener('resize', function() {
+                chart.resize();
+            });
+        }
+
+        function loadRelatedProfessors() {
+            const container = document.getElementById('relatedProfessors');
+            const relatedProfessors = [
+                { name: "Dr. Michael Chen", subject: "Mathematics", rating: 4.7 },
+                { name: "Prof. Emily Rodriguez", subject: "Physics", rating: 4.8 },
+                { name: "Dr. David Kim", subject: "Chemistry", rating: 4.6 }
+            ];
+            
+            container.innerHTML = relatedProfessors.map(prof => `
+                <div class="flex items-center justify-between p-3 bg-soft-gray rounded-lg">
+                    <div>
+                        <div class="font-semibold text-sm text-gray-900">${prof.name}</div>
+                        <div class="text-xs text-gray-600">${prof.subject}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="rating-stars text-sm">${generateStars(prof.rating)}</div>
+                        <div class="text-xs text-gray-600">${prof.rating}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Review interaction functions
+        function markHelpful(reviewId) {
+            const review = allReviews.find(r => r.id === reviewId);
+            if (review) {
+                review.helpful++;
+                // Refresh the display
+                displayReviews();
+            }
+        }
+
+        function reportReview(reviewId) {
+            if (confirm('Are you sure you want to report this review?')) {
+                alert('Thank you for your report. We will review this review shortly.');
+            }
+        }
+
+        function shareProfessor() {
+            if (navigator.share) {
+                navigator.share({
+                    title: `${currentProfessor.name} - Feedback System`,
+                    text: `Check out reviews for ${currentProfessor.name} on Feedback System`,
+                    url: window.location.href
+                });
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                navigator.clipboard.writeText(window.location.href);
+                alert('Link copied to clipboard!');
+            }
+        }
+
+        // Modal functions
+        function showAddReview() {
+            const modal = document.getElementById('addReviewModal');
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAddReview() {
+            const modal = document.getElementById('addReviewModal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            resetReviewForm();
+        }
+
+        function initializeReviewForm() {
+            const ratingStars = document.querySelectorAll('.star');
+            const reviewText = document.getElementById('reviewText');
+            
+            ratingStars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    setRating(rating);
+                });
+                
+                star.addEventListener('mouseover', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    highlightStars(rating);
+                });
+            });
+            
+            document.querySelector('.rating-input').addEventListener('mouseleave', function() {
+                highlightStars(currentRating);
+            });
+            
+            if (reviewText) {
+                reviewText.addEventListener('input', function() {
+                    const count = this.value.length;
+                    document.getElementById('charCount').textContent = count;
+                    
+                    if (count > 1000) {
+                        this.value = this.value.substring(0, 1000);
+                        document.getElementById('charCount').textContent = 1000;
+                    }
+                });
+            }
+        }
+
+        function setRating(rating) {
+            currentRating = rating;
+            highlightStars(rating);
+            updateRatingText(rating);
+        }
+
+        function highlightStars(rating) {
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.remove('text-gray-300');
+                    star.classList.add('text-gold');
+                } else {
+                    star.classList.remove('text-gold');
+                    star.classList.add('text-gray-300');
+                }
+            });
+        }
+
+        function updateRatingText(rating) {
+            const ratingText = document.getElementById('ratingText');
+            const ratingTexts = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+            ratingText.textContent = ratingTexts[rating] || 'Click to rate';
+        }
+
+        function resetReviewForm() {
+            document.getElementById('reviewForm').reset();
+            currentRating = 0;
+            highlightStars(0);
+            updateRatingText(0);
+            document.getElementById('charCount').textContent = '0';
+        }
+
+        function submitReview(event) {
+            event.preventDefault();
+            
+            if (currentRating === 0) {
+                alert('Please select a rating before submitting your review.');
+                return;
+            }
+            
+            const formData = {
+                course: document.getElementById('courseName').value,
+                semester: document.getElementById('semester').value,
+                rating: currentRating,
+                review: document.getElementById('reviewText').value,
+                anonymous: document.getElementById('anonymous').checked
+            };
+            
+            // Simulate form submission
+            anime({
+                targets: '#reviewForm',
+                opacity: [1, 0.5],
+                duration: 300,
+                complete: function() {
+                    setTimeout(() => {
+                        alert('Thank you for your review! It has been submitted for moderation.');
+                        closeAddReview();
+                        
+                        // Add the new review to the list (in a real app, this would be handled by the backend)
+                        const newReview = {
+                            id: allReviews.length + 1,
+                            author: formData.anonymous ? 'Anonymous' : 'You',
+                            avatar: 'resources/student-avatars/avatar-1.jpg',
+                            rating: formData.rating,
+                            date: new Date().toISOString().split('T')[0],
+                            course: formData.course,
+                            semester: formData.semester,
+                            text: formData.review,
+                            helpful: 0,
+                            anonymous: formData.anonymous
+                        };
+                        
+                        allReviews.unshift(newReview);
+                        displayReviews();
+                    }, 500);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

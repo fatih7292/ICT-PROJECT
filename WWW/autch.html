@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация и Вход</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: linear-gradient(135deg, #0a3d62, #3c6382);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .wrapper {
+            width: 380px;
+            padding: 20px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            box-shadow: 0 0 25px rgba(0,0,0,0.35);
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        input {
+            width: 94%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 10px;
+            border: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #1e90ff;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #4682b4;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            margin: 25px 0;
+        }
+
+        a {
+            color: #c1e9ff;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <h2>Регистрация</h2>
+
+        <form action="register.php" method="POST">
+            <input type="text" name="username" placeholder="Логин" required>
+            <input type="password" name="password" placeholder="Пароль" required>
+            <button type="submit">Зарегистрироваться</button>
+        </form>
+
+        <hr>
+
+        <h2>Вход</h2>
+
+        <form action="login.php" method="POST">
+            <input type="text" name="username" placeholder="Логин" required>
+            <input type="password" name="password" placeholder="Пароль" required>
+            <button type="submit">Войти</button>
+
+
+        </form>
+    </div>
+
+</body>
+</html>
+<body>
+    <body style="background: url('regfon (2).jpg') no-repeat center center fixed; background-size: cover;">
+</body> 
+<h1 style="font-size: 60px; color: #4da6ff; text-align: center; margin-top: -7px; margin-left: 180px;">
+     <br>
+    
+<h1>
+     
+<h1 class="color-animated">
+    Welcome to <br>
+    Feedback System
+</h1>
+
+<style>
+.color-animated {
+    font-size: 60px;
+    color: #4da6ff; /* стартовый цвет */
+    text-align: center;
+    margin-top: -7px;
+    margin-left: 0px;
+    animation: colorChange 3s infinite alternate;
+}
+
+/* Анимация изменения цвета */
+@keyframes colorChange {
+    0%   { color: #4da6ff; }
+    25%  { color: #ff6f61; }
+    50%  { color: #ffe066; }
+    75%  { color: #6a4c93; }
+    100% { color: #4da6ff; }
+}
+</style>
+
+</h1>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.11.0/brython.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.11.0/brython_stdlib.js"></script>
+
+<body onload="brython()">
+
+<div id="social-container" style="text-align:center; margin-top: 30px;"></div>
+
+<script type="text/python">
+from browser import document, html
+
+socials = {
+    "Facebook": "https://www.facebook.com/YessenovUniversity/?locale=ru_RU",
+    "Instagram": "https://www.instagram.com/yessenovuniversity/",
+    "Twitter": "https://www.twitter.com"
+}
+
+for name, link in socials.items():
+    btn = html.A(name, href=link, target="_blank", Class="social-btn")
+    document['social-container'] <= btn
+</script>
+
+<style>
+.social-btn {
+    display: inline-block;
+    margin: 5px;
+    padding: 10px 20px;
+    background: #1e90ff;
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    transition: 0.3s;
+    font-family: Arial;
+    margin-top: 50px;
+}
+
+.social-btn:hover {
+    background: #4682b4;
+}
+/* Фиксируем блок внизу страницы */
+#social-container {
+    position: fixed;
+    bottom: 20px; /* отступ от низа */
+    width: 100%;
+    text-align: center;
+    z-index: 1000; /* чтобы был поверх всего */
+}
+</style>
+</body>

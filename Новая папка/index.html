@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback System - Rate Your Professors</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'display': ['Playfair Display', 'serif'],
+                        'body': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'navy': '#1e3a8a',
+                        'gold': '#d97706',
+                        'success': '#059669',
+                        'soft-gray': '#f8fafc',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .hero-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .particle-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .search-glow {
+            box-shadow: 0 0 20px rgba(217, 119, 6, 0.3);
+        }
+        
+        .professor-card {
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .professor-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .rating-stars {
+            color: #d97706;
+        }
+        
+        .nav-link {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-link:hover {
+            color: #d97706;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #d97706;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.6s ease;
+        }
+    </style>
+</head>
+<body class="font-body bg-soft-gray">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="text-2xl font-display font-bold text-navy">Feedback System</div>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#" class="nav-link text-gray-700 hover:text-gold font-medium">Home</a>
+                    <a href="#" class="nav-link text-gray-700 hover:text-gold font-medium">Browse</a>
+                    <a href="#" class="nav-link text-gray-700 hover:text-gold font-medium">About</a>
+                    <button onclick="showAddReview()" class="bg-gold text-white px-6 py-2 rounded-full hover:bg-yellow-600 transition-colors font-medium">Add Review</button>
+                </div>
+                <div class="md:hidden">
+                    <button class="text-gray-700 hover:text-gold">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg min-h-screen flex items-center pt-16">
+        <canvas id="particleCanvas" class="particle-canvas"></canvas>
+        <div class="hero-content w-full">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h1 class="text-5xl md:text-7xl font-display font-bold text-white mb-6">
+                        <span id="typed-text"></span>
+                    </h1>
+                    <p class="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto">
+                        Help students make informed decisions about their education. Share your experiences and discover the best professors for your academic journey.
+                    </p>
+                </div>
+                
+                <!-- Search Bar -->
+                <div class="max-w-4xl mx-auto mb-12">
+                    <div class="bg-white rounded-2xl p-6 shadow-2xl search-glow">
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <div class="flex-1">
+                                <input 
+                                    type="text" 
+                                    id="searchInput"
+                                    placeholder="Search by professor name, subject, or university..."
+                                    class="w-full px-6 py-4 text-lg border-0 focus:outline-none focus:ring-0 bg-transparent"
+                                    oninput="handleSearch(this.value)"
+                                >
+                            </div>
+                            <div class="flex gap-2">
+                                <select id="subjectFilter" class="px-4 py-4 border-0 focus:outline-none focus:ring-0 bg-gray-50 rounded-lg">
+                                    <option value="">All Subjects</option>
+                                    <option value="Computer Science">Computer Science</option>
+                                    <option value="Mathematics">Mathematics</option>
+                                    <option value="Physics">Physics</option>
+                                    <option value="Chemistry">Chemistry</option>
+                                    <option value="Biology">Biology</option>
+                                    <option value="English Literature">English Literature</option>
+                                    <option value="History">History</option>
+                                    <option value="Psychology">Psychology</option>
+                                </select>
+                                <button onclick="performSearch()" class="bg-gold text-white px-8 py-4 rounded-lg hover:bg-yellow-600 transition-colors font-semibold">
+                                    Search
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                    <div class="text-center text-white">
+                        <div class="text-3xl font-bold mb-2" id="professorCount">2,847</div>
+                        <div class="text-blue-100">Professors</div>
+                    </div>
+                    <div class="text-center text-white">
+                        <div class="text-3xl font-bold mb-2" id="reviewCount">15,234</div>
+                        <div class="text-blue-100">Reviews</div>
+                    </div>
+                    <div class="text-center text-white">
+                        <div class="text-3xl font-bold mb-2" id="universityCount">156</div>
+                        <div class="text-blue-100">Universities</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Professors -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 fade-in">
+                <h2 class="text-4xl font-display font-bold text-gray-900 mb-4">Featured Professors</h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Discover top-rated professors across various subjects and universities</p>
+            </div>
+            
+            <div class="splide" id="featuredCarousel">
+                <div class="splide__track">
+                    <ul class="splide__list" id="featuredProfessors">
+                        <!-- Featured professors will be populated by JavaScript -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Top Rated Professors -->
+    <section class="py-20 bg-soft-gray">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 fade-in">
+                <h2 class="text-4xl font-display font-bold text-gray-900 mb-4">Top Rated Professors</h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Highest rated professors based on student feedback</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="topProfessors">
+                <!-- Top professors will be populated by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Search Results -->
+    <section id="searchResults" class="py-20 bg-white hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-8">
+                <h2 class="text-3xl font-display font-bold text-gray-900 mb-4">Search Results</h2>
+                <div class="flex items-center gap-4">
+                    <span class="text-gray-600">Sort by:</span>
+                    <select id="sortBy" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold">
+                        <option value="rating">Rating</option>
+                        <option value="name">Name</option>
+                        <option value="reviews">Review Count</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="searchResultsGrid">
+                <!-- Search results will be populated by JavaScript -->
+            </div>
+            
+            <div class="text-center mt-12">
+                <button id="loadMoreBtn" class="bg-gold text-white px-8 py-3 rounded-lg hover:bg-yellow-600 transition-colors font-semibold">
+                    Load More
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Add Review Modal -->
+    <div id="addReviewModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-display font-bold text-gray-900">Add a Review</h3>
+                    <button onclick="closeAddReview()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <form id="reviewForm" onsubmit="submitReview(event)">
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Professor</label>
+                        <input type="text" id="professorName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold" placeholder="Enter professor name" required>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Subject</label>
+                        <input type="text" id="subjectName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold" placeholder="Enter subject" required>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">University</label>
+                        <input type="text" id="universityName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold" placeholder="Enter university" required>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Rating</label>
+                        <div class="flex items-center gap-2">
+                            <div class="rating-input flex gap-1" data-rating="0">
+                                <span class="star cursor-pointer text-3xl text-gray-300 hover:text-gold" data-rating="1">★</span>
+                                <span class="star cursor-pointer text-3xl text-gray-300 hover:text-gold" data-rating="2">★</span>
+                                <span class="star cursor-pointer text-3xl text-gray-300 hover:text-gold" data-rating="3">★</span>
+                                <span class="star cursor-pointer text-3xl text-gray-300 hover:text-gold" data-rating="4">★</span>
+                                <span class="star cursor-pointer text-3xl text-gray-300 hover:text-gold" data-rating="5">★</span>
+                            </div>
+                            <span id="ratingText" class="text-gray-600 ml-2">Click to rate</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Review</label>
+                        <textarea id="reviewText" rows="6" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold" placeholder="Share your experience with this professor..." required></textarea>
+                        <div class="text-sm text-gray-500 mt-1">
+                            <span id="charCount">0</span>/500 characters
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="anonymous" class="rounded border-gray-300 text-gold focus:ring-gold">
+                            <span class="ml-2 text-sm text-gray-700">Post anonymously</span>
+                        </label>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <button type="submit" class="flex-1 bg-gold text-white py-3 rounded-lg hover:bg-yellow-600 transition-colors font-semibold">
+                            Submit Review
+                        </button>
+                        <button type="button" onclick="closeAddReview()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-navy text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="text-2xl font-display font-bold mb-4">Feedback System</div>
+                <p class="text-blue-200 mb-6">Empowering students to make informed educational choices</p>
+                <div class="text-sm text-blue-300">
+                    © 2024 Feedback System. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>

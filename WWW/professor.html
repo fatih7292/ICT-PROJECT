@@ -250,93 +250,96 @@
         </div>
     </section>
 
-    <!-- Add Review Modal -->
-    <div id="addReviewModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div class="p-8">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-2xl font-display font-bold text-gray-900">Add a Review</h3>
-                    <button onclick="closeAddReview()" class="text-gray-400 hover:text-gray-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-                
-                <form id="reviewForm" onsubmit="submitReview(event)">
-                    <div class="mb-6">
-                        <div class="bg-soft-gray p-4 rounded-lg mb-4">
-                            <div class="flex items-center">
-                                <img id="modalProfessorImage" src="" alt="" class="w-12 h-12 rounded-full object-cover mr-3">
-                                <div>
-                                    <div id="modalProfessorName" class="font-semibold text-gray-900"></div>
-                                    <div id="modalProfessorSubject" class="text-sm text-gray-600"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-6">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Your Rating</label>
-                        <div class="flex items-center gap-2">
-                            <div class="rating-input flex gap-1" data-rating="0">
-                                <span class="star cursor-pointer text-3xl text-gray-300 hover:text-gold" data-rating="1">★</span>
-                                <span class="star cursor-pointer text-3xl text-gray-300 hover:text-gold" data-rating="2">★</span>
-                                <span class="star cursor-pointer text-3xl text-gray-300 hover:text-gold" data-rating="3">★</span>
-                                <span class="star cursor-pointer text-3xl text-gray-300 hover:text-gold" data-rating="4">★</span>
-                                <span class="star cursor-pointer text-3xl text-gray-300 hover:text-gold" data-rating="5">★</span>
-                            </div>
-                            <span id="ratingText" class="text-gray-600 ml-2">Click to rate</span>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Course</label>
-                            <input type="text" id="courseName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold" placeholder="e.g., CS101" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Semester</label>
-                            <select id="semester" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold" required>
-                                <option value="">Select semester</option>
-                                <option value="Fall 2024">Fall 2024</option>
-                                <option value="Spring 2024">Spring 2024</option>
-                                <option value="Fall 2023">Fall 2023</option>
-                                <option value="Spring 2023">Spring 2023</option>
-                                <option value="Fall 2022">Fall 2022</option>
-                                <option value="Spring 2022">Spring 2022</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-6">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Your Review</label>
-                        <textarea id="reviewText" rows="6" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold" placeholder="Share your experience with this professor... What did you like? What could be improved?" required></textarea>
-                        <div class="text-sm text-gray-500 mt-1">
-                            <span id="charCount">0</span>/1000 characters
-                        </div>
-                    </div>
-                    
-                    <div class="mb-6">
-                        <label class="flex items-center">
-                            <input type="checkbox" id="anonymous" class="rounded border-gray-300 text-gold focus:ring-gold">
-                            <span class="ml-2 text-sm text-gray-700">Post anonymously (your name will not be shown)</span>
-                        </label>
-                    </div>
-                    
-                    <div class="flex gap-4">
-                        <button type="submit" class="flex-1 bg-gold text-white py-3 rounded-lg hover:bg-yellow-600 transition-colors font-semibold">
-                            Submit Review
-                        </button>
-                        <button type="button" onclick="closeAddReview()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+<!-- Add Review Modal -->
+<div id="addReviewModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="p-8">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-2xl font-display font-bold text-gray-900">Add a Review</h3>
+        <button onclick="closeAddReview()" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
 
+      <form id="reviewForm" action="submit_review.php" method="POST" onsubmit="return true;">
+        <!-- скрытые поля -->
+        <input type="hidden" name="professor_name" value="Dr. Sarah Johnson">
+        <input type="hidden" name="course" value="CS101">
+        <input type="hidden" name="rating" id="ratingField" value="0">
+        <div class="mb-6">
+          <div class="bg-soft-gray p-4 rounded-lg mb-4">
+            <div class="flex items-center">
+              <img id="modalProfessorImage" src="" alt="" class="w-12 h-12 rounded-full object-cover mr-3">
+              <div>
+                <div id="modalProfessorName" class="font-semibold text-gray-900"></div>
+                <div id="modalProfessorSubject" class="text-sm text-gray-600"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Your Rating</label>
+          <div class="flex items-center gap-2">
+            <div class="rating-input flex gap-1" data-rating="0">
+              <span class="star cursor-pointer text-3xl text-gray-300 hover:text-gold" data-rating="1">★</span>
+              <span class="star cursor-pointer text-3xl text-gray-300 hover:text-gold" data-rating="2">★</span>
+              <span class="star cursor-pointer text-3xl text-gray-300 hover:text-gold" data-rating="3">★</span>
+              <span class="star cursor-pointer text-3xl text-gray-300 hover:text-gold" data-rating="4">★</span>
+              <span class="star cursor-pointer text-3xl text-gray-300 hover:text-gold" data-rating="5">★</span>
+            </div>
+            <span id="ratingText" class="text-gray-600 ml-2">Click to rate</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Course</label>
+            <input type="text" name="course" id="courseName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold" placeholder="e.g., CS101" required>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Semester</label>
+            <select name="semester" id="semester" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold" required>
+              <option value="">Select semester</option>
+              <option value="Fall 2024">Fall 2024</option>
+              <option value="Spring 2024">Spring 2024</option>
+              <option value="Fall 2023">Fall 2023</option>
+              <option value="Spring 2023">Spring 2023</option>
+              <option value="Fall 2022">Fall 2022</option>
+              <option value="Spring 2022">Spring 2022</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Your Review</label>
+          <textarea name="review_text" id="reviewText" rows="6" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold" placeholder="Share your experience with this professor... What did you like? What could be improved?" required></textarea>
+          <div class="text-sm text-gray-500 mt-1">
+            <span id="charCount">0</span>/1000 characters
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <label class="flex items-center">
+            <input type="checkbox" id="anonymous" class="rounded border-gray-300 text-gold focus:ring-gold">
+            <span class="ml-2 text-sm text-gray-700">Post anonymously (your name will not be shown)</span>
+          </label>
+        </div>
+
+        <div class="flex gap-4">
+          <button type="submit" class="flex-1 bg-gold text-white py-3 rounded-lg hover:bg-yellow-600 transition-colors font-semibold">
+            Submit Review
+          </button>
+          <button type="button" onclick="closeAddReview()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
     <!-- Footer -->
     <footer class="bg-navy text-white py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -393,11 +396,11 @@
                     name: "Dr. Sarah Johnson",
                     subject: "Computer Science",
                     university: "Stanford University",
-                    image: "resources/professor-1.jpg",
+                    image: "resources/dr1.jpg",
                     rating: 4.9,
                     reviewCount: 127,
                     specialties: ["Artificial Intelligence", "Machine Learning", "Data Science"],
-                    bio: "Dr. Sarah Johnson is a leading researcher in artificial intelligence with over 15 years of teaching experience. She holds a PhD in Computer Science from MIT and has published numerous papers in top-tier conferences. Her passion for making complex AI concepts accessible to students has earned her consistently high ratings. She believes in hands-on learning and often incorporates real-world projects into her curriculum.",
+                    bio: "Dr. Sarah Johnson is a leading researcher in artificial intelligence with over 14 years of teaching experience. She holds a PhD in Computer Science from MIT and has published numerous papers in top-tier conferences. Her passion for making complex AI concepts accessible to students has earned her consistently high ratings. She believes in hands-on learning and often incorporates real-world projects into her curriculum.",
                     reviews: [
                         {
                             id: 1,
@@ -802,10 +805,16 @@
         }
 
         function setRating(rating) {
-            currentRating = rating;
-            highlightStars(rating);
-            updateRatingText(rating);
-        }
+    currentRating = rating;
+    highlightStars(rating);
+    updateRatingText(rating);
+
+    // ⭐ Логируем
+    console.log('setRating вызван:', rating);
+    console.log('currentRating теперь:', currentRating);
+    document.getElementById('ratingField').value = rating;
+    console.log('ratingField теперь:', document.getElementById('ratingField').value);
+}
 
         function highlightStars(rating) {
             const stars = document.querySelectorAll('.star');
@@ -834,22 +843,24 @@
             document.getElementById('charCount').textContent = '0';
         }
 
-        function submitReview(event) {
-            event.preventDefault();
-            
-            if (currentRating === 0) {
-                alert('Please select a rating before submitting your review.');
-                return;
-            }
-            
-            const formData = {
-                course: document.getElementById('courseName').value,
-                semester: document.getElementById('semester').value,
-                rating: currentRating,
-                review: document.getElementById('reviewText').value,
-                anonymous: document.getElementById('anonymous').checked
-            };
-            
+function submitReview(event) {
+    // Если рейтинг не выбран — блокируем отправку
+    if (currentRating === 0) {
+        alert('Please select a rating before submitting your review.');
+        event.preventDefault();
+        return;
+        console.log('currentRating =', currentRating);
+console.log('ratingField ДО =', document.getElementById('ratingField').value);
+document.getElementById('ratingField').value = currentRating;
+console.log('ratingField ПОСЛЕ =', document.getElementById('ratingField').value);
+    }
+
+    // ⭐ Записываем выбранный рейтинг в скрытое поле
+    document.getElementById('ratingField').value = currentRating;
+
+    // ✅ Всё ок — форма сама уйдёт в submit_review.php
+    // НЕ вызываем event.preventDefault() здесь
+}
             // Simulate form submission
             anime({
                 targets: '#reviewForm',
@@ -879,7 +890,33 @@
                     }, 500);
                 }
             });
-        }
+        
     </script>
+    <script>
+document.getElementById('reviewForm').addEventListener('submit', function (e) {
+    e.preventDefault(); // Остановим отправку, чтобы проверить
+    const data = new FormData(this);
+    console.log('Форма собрала данные:');
+    for (let [k, v] of data.entries()) {
+        console.log(k, '=', v);
+    }
+    // Теперь можно разблокировать отправку
+    this.submit(); // Отправим данные
+});
+function submitReview(event) {
+    // Проверяем рейтинг
+    if (currentRating === 0) {
+        alert('Please select a rating before submitting your review.');
+        event.preventDefault();
+        return;
+    }
+
+    // ⭐ Записываем выбранный рейтинг в скрытое поле
+    document.getElementById('ratingField').value = currentRating;
+
+    // Разрешаем отправку формы
+    // НЕ вызываем event.preventDefault() здесь
+}
+</script>
+
 </body>
-</html>

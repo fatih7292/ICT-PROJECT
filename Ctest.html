@@ -1,0 +1,331 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>onSET Deutsch - Probentest</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        #app-container {
+            width: 100%;
+            max-width: 800px;
+            background-color: #e9f0f5;
+            border: 1px solid #b0c4de;
+            padding: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 25px;
+        }
+        .text-content {
+            font-size: 16px;
+            line-height: 2.2;
+            color: #333;
+            background: #e9f0f5;
+            text-align: justify;
+        }
+        .gap-input {
+            width: 50px;
+            border: none;
+            border-bottom: 2px solid #888;
+            background-color: #fff;
+            font-size: 16px;
+            font-family: monospace;
+            padding: 0 2px;
+            margin: 0 1px;
+            text-align: left;
+            outline: none;
+        }
+        .gap-input:focus {
+            border-bottom: 2px solid #0056b3;
+            background-color: #e6f2ff;
+        }
+        .controls {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+        }
+        .checkbox-container input {
+            margin-right: 10px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+        .progress-text {
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+        }
+        .keyboard-bar {
+            margin-top: 30px;
+            background-color: #a4b8ca;
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            border-radius: 4px;
+        }
+        .char-btn {
+            background: #4a708b;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin: 0 3px;
+            font-size: 16px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .char-btn:hover {
+            background: #36556b;
+        }
+        .btn {
+            padding: 10px 20px;
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        .btn:hover {
+            background-color: #004494;
+        }
+        .btn-danger {
+            background-color: #c82333;
+        }
+        .btn-danger:hover {
+            background-color: #a11b2a;
+        }
+        #results-screen {
+            display: none;
+            text-align: center;
+        }
+        .result-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .score-huge {
+            font-size: 48px;
+            color: #0056b3;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    
+    <!-- Экран тестирования -->
+    <div id="test-screen">
+        <h2 id="text-title">Titel</h2>
+        <div id="text-container" class="text-content"></div>
+
+        <div class="controls">
+            <label class="checkbox-container">
+                <input type="checkbox" id="fertig-checkbox" onchange="nextText()">
+                TEXT FERTIG BEARBEITET
+            </label>
+            <span class="progress-text">Text <span id="current-text-num">1</span> von 8</span>
+        </div>
+
+        <div style="margin-top: 20px; text-align: right;">
+            <button class="btn btn-danger" onclick="finishTestEarly()">Test vorzeitig beenden</button>
+        </div>
+
+        <div class="keyboard-bar">
+            Hier klicken, wenn Sie Sonderzeichen brauchen: 
+            <button class="char-btn" onclick="insertChar('ä')">ä</button>
+            <button class="char-btn" onclick="insertChar('ö')">ö</button>
+            <button class="char-btn" onclick="insertChar('ü')">ü</button>
+            <button class="char-btn" onclick="insertChar('ß')">ß</button>
+        </div>
+    </div>
+
+    <!-- Экран результатов -->
+    <div id="results-screen">
+        <h2>Testergebnis (onSET)</h2>
+        <div class="result-box">
+            <p>Ihre erreichte Punktzahl:</p>
+            <div class="score-huge" id="final-score">0 / 160</div>
+            <p>Prozentual: <strong id="final-percent">0%</strong></p>
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ccc;">
+            <p>Ihr Sprachniveau (CEFR):</p>
+            <div class="score-huge" id="final-cefr" style="color: #28a745;">A2</div>
+        </div>
+        <button class="btn" style="margin-top: 20px;" onclick="location.reload()">Test wiederholen</button>
+    </div>
+
+</div>
+
+<script>
+    // База из 8 текстов с правильным распределением пропусков (по 20 в каждом)
+    const textsData = [
+        {
+            level: "A2",
+            title: "Familie und Wochenende",
+            content: "Mein Name ist Anna und ich lebe in Berlin. Ich ha{be} eine gro{ße} Familie, d{ie} in d{er} ganzen St{adt} verteilt i{st}. Jeden Son{ntag} besuchen w{ir} unsere Große{ltern}. Sie woh{nen} in ei{nem} kleinen Ha{us} mit ei{nem} schönen Gar{ten}. Meine Mut{ter} backt im{mer} einen leck{eren} Kuchen, u{nd} mein Va{ter} hilft i{hr}. Das ist immer eine sehr schöne Zeit für uns alle."
+        },
+        {
+            level: "A2",
+            title: "Einkaufen im Supermarkt",
+            content: "Heute gehe ich in den Supermarkt. Der Kühl{schrank} ist fa{st} leer, des{halb} muss i{ch} viel eink{aufen}. Zuerst bra{uche} ich fris{ches} Gemüse u{nd} einige Frü{chte} für d{as} Frühstück. Danach ge{he} ich z{ur} Bäckerei u{nd} kaufe fris{ches} Brot. Am En{de} hole i{ch} noch Mi{lch} und Kä{se} aus d{em} Kühlregal. Dann ge{he} ich endlich nach Hause."
+        },
+        {
+            level: "B1",
+            title: "Reisen und Urlaub",
+            content: "Viele Menschen reisen gerne in andere Länder, um neue Kulturen kennenzulernen. Sie pac{ken} ihre Kof{fer} und fli{egen} oft a{ns} Meer od{er} in d{ie} Berge. Dort verbr{ingen} sie ei{ne} erholsame Ze{it} fernab v{om} Stress d{es} Alltags. Manche Tour{isten} besuchen au{ch} berühmte Sehenswür{digkeiten} und prob{ieren} lokale Spezia{litäten}. Das Erwe{itern} des Hori{zonts} ist f{ür} viele wic{htig}. Am Ende der Reise kehren alle mit schönen Erinnerungen zurück."
+        },
+        {
+            level: "B1",
+            title: "Fragen zur Berufswahl",
+            content: "Alte Berufe verschwinden, neue kommen hinzu. Bei d{er} Berufswahl ha{ben} Schüler i{m} Allgemeinen wie{der} Fragen od{er} Probleme. Denn e{s} gibt ei{ne} große Anz{ahl} sehr versch{iedener} Berufe u{nd} es i{st} oft ni{cht} einfach, d{ie} richtige Wa{hl} zu tre{ffen}. Die beruf{liche} Zukunft sol{lte} man recht{zeitig} planen. Manchmal hi{lft} auch e{in} Test. Dabei kann es sinnvoll sein, sich beim Arbeitsamt beraten zu lassen."
+        },
+        {
+            level: "B2",
+            title: "Umwelt und Klima",
+            content: "Der Klimawandel ist eine der größten Herausforderungen unserer Zeit. Weltweit ste{igen} die Temper{aturen} und ext{reme} Wetterereignisse neh{men} deutlich z{u}. Wissenschaftler war{nen} schon la{nge} vor d{en} gravierenden Fol{gen} für Men{sch} und Na{tur}. Um di{ese} Entwicklung aufzu{halten}, müssen w{ir} unsere Emiss{ionen} drastisch reduz{ieren}. Jeder Einz{elne} kann du{rch} nachhaltigen Kon{sum} einen Bei{trag} leisten. Nur gemeinsam können wir unseren Planeten für zukünftige Generationen bewahren."
+        },
+        {
+            level: "B2",
+            title: "Geschichte der Familie",
+            content: "Familien haben ihre eigene Geschichte. Oft ka{nn} man s{ie} bis z{u} einem se{hr} frühen Zeit{punkt} zurückverfolgen. Die Ält{eren} erzählen ge{rne} von ih{rer} Kindheit u{nd} Jugend. Alte Fo{tos} und Bri{efe} enthalten wich{tige} Informationen üb{er} die Vergan{genheit}. Sie zei{gen} uns, w{ie} unsere Vorf{ahren} damals wirk{lich} gelebt u{nd} gearbeitet ha{ben}. So kann man auf unterhaltsame Weise viel über die Geschichte der eigenen Familie erfahren."
+        },
+        {
+            level: "C1",
+            title: "Wissenschaft und Forschung",
+            content: "Die moderne Wissenschaft entwickelt sich in einem atemberaubenden Tempo. Dank innov{ativer} Technologien kön{nen} Forscher he{ute} komplexe Zusamme{nhänge} besser vers{tehen}. Besonders i{n} der Med{izin} gibt e{s} enorme Fortsc{hritte}, die vie{len} Patienten ne{ue} Hoffnung ge{ben}. Dennoch ble{iben} viele Fra{gen} unbeantwortet, w{as} weitere inte{nsive} Studien erford{erlich} macht. Die Gesell{schaft} profitiert mas{siv} da{von}. Es ist daher unerlässlich, in Forschung und Bildung kontinuierlich zu investieren."
+        },
+        {
+            level: "C1",
+            title: "Wirtschaft und Globalisierung",
+            content: "Die Globalisierung hat die weltweiten Wirtschaftsstrukturen tiefgreifend verändert. Internationale Handelsbe{ziehungen} sind heutz{utage} enger mitein{ander} verflochten a{ls} jemals zu{vor}. Unternehmen agi{eren} zunehmend a{uf} globalen Mär{kten}, um ih{re} Wettbewerbsfähigkeit z{u} steigern. Dies fü{hrt} einerseits z{u} mehr Effi{zienz}, bringt ab{er} andererseits au{ch} soziale Herausfor{derungen} mit si{ch}. Nationale Regie{rungen} müssen regul{ierend} ein{greifen}. Ein faires und nachhaltiges Wirtschaftswachstum sollte das primäre Ziel aller Akteure sein."
+        }
+    ];
+
+    let currentIndex = 0;
+    let userAnswers = {}; 
+    let lastFocusedInput = null;
+
+    function initTest() {
+        // Инициализация структуры ответов
+        textsData.forEach((_, idx) => {
+            userAnswers[idx] = [];
+        });
+        loadText(currentIndex);
+    }
+
+    function loadText(index) {
+        const textObj = textsData[index];
+        document.getElementById("text-title").innerText = textObj.title;
+        document.getElementById("current-text-num").innerText = index + 1;
+        document.getElementById("fertig-checkbox").checked = false;
+
+        let gapCounter = 0;
+        // Замена шаблонов {ответ} на input
+        const htmlContent = textObj.content.replace(/\{([^}]+)\}/g, (match, p1) => {
+            let gapId = gapCounter++;
+            let currentVal = userAnswers[index][gapId] || "";
+            return `<input type="text" class="gap-input" data-textidx="${index}" data-gapidx="${gapId}" data-answer="${p1}" value="${currentVal}" maxlength="${p1.length + 2}" onfocus="setFocus(this)" oninput="saveAnswer(this)">`;
+        });
+
+        document.getElementById("text-container").innerHTML = htmlContent;
+    }
+
+    function setFocus(el) {
+        lastFocusedInput = el;
+    }
+
+    function saveAnswer(el) {
+        let tIdx = el.getAttribute("data-textidx");
+        let gIdx = el.getAttribute("data-gapidx");
+        userAnswers[tIdx][gIdx] = el.value.trim();
+    }
+
+    function insertChar(char) {
+        if (lastFocusedInput) {
+            lastFocusedInput.value += char;
+            saveAnswer(lastFocusedInput);
+            lastFocusedInput.focus();
+        }
+    }
+
+    function nextText() {
+        setTimeout(() => {
+            if (currentIndex < textsData.length - 1) {
+                currentIndex++;
+                loadText(currentIndex);
+            } else {
+                finishTestEarly();
+            }
+        }, 400); // Небольшая задержка для визуального эффекта клика
+    }
+
+    function finishTestEarly() {
+        document.getElementById("test-screen").style.display = "none";
+        document.getElementById("results-screen").style.display = "block";
+        calculateScore();
+    }
+
+    function calculateScore() {
+        let totalGaps = 160; // 8 текстов * 20 пропусков
+        let correctGaps = 0;
+
+        textsData.forEach((textObj, idx) => {
+            let regex = /\{([^}]+)\}/g;
+            let match;
+            let gapId = 0;
+            while ((match = regex.exec(textObj.content)) !== null) {
+                let correctAnswer = match[1].toLowerCase();
+                let userAnswer = (userAnswers[idx][gapId] || "").toLowerCase();
+                if (userAnswer === correctAnswer) {
+                    correctGaps++;
+                }
+                gapId++;
+            }
+        });
+
+        let percent = Math.round((correctGaps / totalGaps) * 100);
+        document.getElementById("final-score").innerText = `${correctGaps} / ${totalGaps}`;
+        document.getElementById("final-percent").innerText = `${percent}%`;
+
+        // Шкала onSET CEFR (приблизительная оценка для 160 баллов)
+        let cefr = "Unter A2";
+        if (correctGaps >= 126) cefr = "C1 (oder höher)";
+        else if (correctGaps >= 96) cefr = "B2";
+        else if (correctGaps >= 66) cefr = "B1";
+        else if (correctGaps >= 40) cefr = "A2";
+
+        document.getElementById("final-cefr").innerText = cefr;
+    }
+
+    // Запуск теста при загрузке
+    initTest();
+</script>
+</body>
+</html>

@@ -159,6 +159,33 @@
     opacity: 1;
 }
 
+/* Контейнер для логотипа и его центрирование */
+.logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px; /* Отступ до названия "Familie und Wochenende" */
+    margin-top: -10px;   /* Подгонка отступа сверху */
+}
+
+/* Настройки самого логотипа */
+.logo-img {
+    height: 60px; /* Высота логотипа */
+    width: auto;
+    object-fit: contain;
+}
+
+/* Стиль подписи "onSET" под иконкой */
+.logo-text {
+    font-size: 14px;
+    font-weight: bold;
+    color: #4a5568;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 5px;
+}
+
     </style>
 </head>
 <body>
@@ -171,7 +198,7 @@
         <!-- БЛОК С ЛОГОТИПОМ -->
         <div class="logo-container">
             <img src="38976769-47C4-4197-8691-FF1C0B1CED34.png" alt="onSET Logo" class="logo-img">
-            <span class="logo-text">onSET</span>
+            <span class="logo-text">Beispiel Test</span>
         </div>
         <h2 id="text-title">Titel</h2>
         <div id="text-container" class="text-content"></div>

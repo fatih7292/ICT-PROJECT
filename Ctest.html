@@ -361,6 +361,17 @@ function showToast(message = "Sie haben OnSET Beispiel Test C1 begonnen", durati
     }, duration);
 }
 
+function initTest() {
+    textsData.forEach((_, idx) => {
+        userAnswers[idx] = [];
+    });
+    loadText(currentIndex);
+
+    // ВЫЗОВ УВЕДОМЛЕНИЯ ПРИ СТАРТЕ:
+    showToast("Du hast ein Beispiel Test beginnt!");
+}
+
+
     // Запуск теста при загрузке
     initTest();
 </script>

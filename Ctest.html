@@ -135,9 +135,34 @@
             font-weight: bold;
             margin: 10px 0;
         }
+        
+        /* Всплывающее уведомление сверху */
+.toast-notification {
+    position: fixed;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #0056b3;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 1000;
+    opacity: 0;
+    transition: all 0.4s ease;
+}
+
+.toast-notification.show {
+    top: 20px;
+    opacity: 1;
+}
+
     </style>
 </head>
 <body>
+<div id="toast-msg" class="toast-notification"></div>
 
 <div id="app-container">
     
@@ -325,6 +350,16 @@
 
         document.getElementById("final-cefr").innerText = cefr;
     }
+
+function showToast(message = "Sie haben OnSET Beispiel Test C1 begonnen", duration = 3000) {
+    const toast = document.getElementById("toast-msg");
+    toast.innerText = message;
+    toast.classList.add("show");
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+    }, duration);
+}
 
     // Запуск теста при загрузке
     initTest();

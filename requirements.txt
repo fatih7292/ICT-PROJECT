@@ -1,0 +1,9 @@
+streamlit
+pandas
+plotly
+deepface
+tf-keras
+opencv-python
+scipy
+scikit-learn
+statsmodels
